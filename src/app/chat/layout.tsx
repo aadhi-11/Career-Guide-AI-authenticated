@@ -38,10 +38,10 @@ function DeleteModal({ isOpen, onClose, onConfirm, sessionTitle, isDeleting }: D
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-black rounded-lg p-6 max-w-md w-full border border-gray-200 dark:border-black">
-        <h3 className="text-lg font-semibold text-black dark:text-white mb-4">
+        <h3 className="text-lg font-semibold text-black dark:text-black mb-4">
           Delete Chat Session
         </h3>
-        <p className="text-gray-600 dark:text-gray-300 mb-6">
+        <p className="text-gray-600 dark:text-black mb-6">
           Are you sure you want to delete "{sessionTitle}"? This action cannot be undone.
         </p>
         <div className="flex gap-3 justify-end">
@@ -49,7 +49,7 @@ function DeleteModal({ isOpen, onClose, onConfirm, sessionTitle, isDeleting }: D
             variant="outline"
             onClick={onClose}
             disabled={isDeleting}
-            className="text-gray-600 dark:text-white border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="text-gray-600 dark:text-black border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             Cancel
           </Button>
@@ -285,20 +285,20 @@ export default function ChatLayout({
                   onClick={() => selectChatSession(session.id)}
                   onMouseEnter={() => setHoveredSessionId(session.id)}
                   onMouseLeave={() => setHoveredSessionId(null)}
-                  className={`p-2 lg:p-3 rounded-lg cursor-pointer transition-colors relative group ${activeSessionId === session.id
+                  className={`p-2 lg:p-3 rounded-lg cursor-pointer transition-all duration-200 relative group ${activeSessionId === session.id
                     ? "bg-gray-300 dark:bg-gray-700 border border-gray-400 dark:border-gray-500 shadow-sm"
-                    : "hover:bg-gray-200 dark:hover:bg-gray-800 hover:shadow-sm"
+                    : "hover:bg-gray-200 dark:hover:bg-gray-700 hover:shadow-sm"
                     }`}
                 >
-                  <div className="font-medium text-xs lg:text-sm text-black dark:text-white truncate pr-8">
+                  <div className="font-medium text-xs lg:text-sm text-black dark:!text-white truncate pr-8 group-hover:text-gray-800 dark:group-hover:!text-gray-100 transition-colors duration-200">
                     {session.title}
                   </div>
                   {session.lastMessage && (
-                    <div className="text-xs text-gray-500 dark:text-gray-300 truncate mt-1 line-clamp-2 pr-8">
+                    <div className="text-xs text-gray-500 dark:text-gray-300 truncate mt-1 line-clamp-2 pr-8 group-hover:text-gray-600 dark:group-hover:text-gray-200 transition-colors duration-200">
                       {session.lastMessage}
                     </div>
                   )}
-                  <div className="text-xs text-gray-400 dark:text-gray-400 mt-1">
+                  <div className="text-xs text-gray-400 dark:text-gray-400 mt-1 group-hover:text-gray-500 dark:group-hover:text-gray-300 transition-colors duration-200">
                     {new Date(session.timestamp).toLocaleDateString()}
                   </div>
                   

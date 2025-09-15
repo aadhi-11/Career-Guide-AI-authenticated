@@ -2,7 +2,6 @@
 
 import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { ArrowRight, Brain, MessageSquare, Zap, Shield, Users } from "lucide-react";
 import Link from "next/link";
 
@@ -29,7 +28,6 @@ export default function Home() {
             </div>
             
             <div className="flex items-center space-x-4">
-              <ThemeToggle />
               {isSignedIn ? (
                 <UserButton 
                   appearance={{
@@ -58,7 +56,7 @@ export default function Home() {
       </nav>
 
       {/* Main Content */}
-      <div className="flex flex-col justify-center items-center min-h-screen px-4 sm:px-6 lg:px-8 relative">
+      <div className="flex flex-col justify-center items-center min-h-screen px-4 sm:px-6 lg:px-8 relative pt-20 sm:pt-0">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900"></div>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent"></div>

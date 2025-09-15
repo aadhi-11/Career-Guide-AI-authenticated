@@ -3,8 +3,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 const isProtectedRoute = createRouteMatcher([
   '/chat(.*)',
-  '/api/chat(.*)',
-  '/api/trpc(.*)'
+  '/api/chat(.*)'
 ]);
 
 export default clerkMiddleware((auth, req) => {

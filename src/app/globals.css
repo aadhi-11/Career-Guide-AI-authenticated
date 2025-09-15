@@ -155,6 +155,15 @@
   color: hsl(0 0% 80%) !important;
 }
 
+/* Force session titles to be white in dark mode */
+.dark .chat-sidebar .font-medium {
+  color: hsl(0 0% 100%) !important;
+}
+
+.dark .chat-sidebar .text-black {
+  color: hsl(0 0% 100%) !important;
+}
+
 /* Force chat messages area text colors in dark mode */
 .dark .chat-messages-area .text-gray-900 {
   color: hsl(0 0% 100%) !important;

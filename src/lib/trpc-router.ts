@@ -245,23 +245,20 @@ export const appRouter = router({
       };
     }),
 
-  // Delete a session - PROTECTED
-  deleteSession: protectedProcedure
+  // Delete a session - PUBLIC (temporarily for now)
+  deleteSession: publicProcedure
     .input(z.object({ sessionId: z.string() }))
-    .mutation(async ({ input, ctx }) => {
-      const user = await getOrCreateUser(ctx.userId);
-      
+    .mutation(async ({ input }) => {
       const deletedSession = await prisma.chatSession.deleteMany({
         where: { 
-          id: input.sessionId,
-          userId: user.id // Ensure user owns this session
+          id: input.sessionId
         },
       });
 
       if (deletedSession.count === 0) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Session not found or access denied',
+          message: 'Session not found',
         });
       }
       
