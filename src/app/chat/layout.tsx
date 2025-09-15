@@ -7,7 +7,6 @@ import { Plus, ChevronLeft, ChevronRight, Menu, X, Home, LogOut, Trash2 } from "
 import { ThemeToggle } from "@/components/theme-toggle";
 import { trpc } from "@/lib/trpc-client";
 import { useUser, useClerk } from "@clerk/nextjs";
-import type { ReactNode } from "react";
 
 // TypeScript interfaces
 interface ChatSession {
@@ -42,7 +41,7 @@ function DeleteModal({ isOpen, onClose, onConfirm, sessionTitle, isDeleting }: D
           Delete Chat Session
         </h3>
         <p className="text-gray-600 dark:text-black mb-6">
-          Are you sure you want to delete "{sessionTitle}"? This action cannot be undone.
+          Are you sure you want to delete &quot;{sessionTitle}&quot;? This action cannot be undone.
         </p>
         <div className="flex gap-3 justify-end">
           <Button
