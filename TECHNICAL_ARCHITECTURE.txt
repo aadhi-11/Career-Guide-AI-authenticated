@@ -1,0 +1,322 @@
+================================================================================
+                    CAREER GUIDE AI - TECHNICAL ARCHITECTURE
+================================================================================
+
+OVERVIEW
+--------
+Career Guide AI is a full-stack web application built with modern technologies
+to provide AI-powered career guidance through an interactive chat interface.
+The application follows a layered architecture pattern with clear separation
+of concerns between frontend, backend, and data layers.
+
+================================================================================
+1. SYSTEM ARCHITECTURE
+================================================================================
+
+FRONTEND LAYER (Next.js 14)
+----------------------------
+- Framework: Next.js 14 with App Router
+- Language: TypeScript for type safety
+- Styling: Tailwind CSS for responsive design
+- State Management: React Query (TanStack Query) for server state
+- Authentication: Clerk for user management
+- UI Components: Custom components with Lucide React icons
+
+BACKEND LAYER (tRPC + Prisma)
+-----------------------------
+- API Layer: tRPC for type-safe end-to-end communication
+- Database ORM: Prisma for type-safe database operations
+- Authentication: Clerk middleware for route protection
+- AI Integration: Cohere API and Gemini AI for career guidance
+- Real-time: Server-sent events for message updates
+
+DATA LAYER (PostgreSQL)
+-----------------------
+- Database: PostgreSQL for relational data storage
+- Schema: Normalized design with proper relationships
+- Indexing: Optimized for query performance
+- Migrations: Prisma-managed schema evolution
+
+================================================================================
+2. DATABASE DESIGN & SCHEMA ANALYSIS
+================================================================================
+
+DATABASE SCHEMA OVERVIEW
+------------------------
+The database follows a normalized relational design with three main entities:
+Users, ChatSessions, and Messages. This design ensures data integrity,
+scalability, and efficient querying.
+
+ENTITY RELATIONSHIP DIAGRAM
+---------------------------
+User (1) -----> (N) ChatSession (1) -----> (N) Message
+  |                        |                        |
+  |-- id (PK)              |-- id (PK)              |-- id (PK)
+  |-- name                 |-- userId (FK)          |-- chatSessionId (FK)
+  |-- email                |-- title                |-- role
+  |-- createdAt            |-- lastMessage          |-- content
+  |-- updatedAt            |-- createdAt            |-- createdAt
+                           |-- updatedAt            |-- updatedAt
+
+DETAILED SCHEMA ANALYSIS
+========================
+
+1. USER TABLE
+-------------
+Purpose: Stores authenticated user information
+Primary Key: id (UUID)
+Unique Constraint: email
+
+Fields:
+- id: String @id @default(uuid())
+  * Primary key using UUID for security and scalability
+  * UUIDs prevent enumeration attacks and ensure global uniqueness
+  
+- name: String
+  * User's display name for personalization
+  
+- email: String @unique
+  * Unique identifier for authentication
+  * Used for login and user identification
+  
+- createdAt: DateTime @default(now())
+  * Audit field for user registration tracking
+  
+- updatedAt: DateTime @updatedAt
+  * Automatic timestamp for record modifications
+
+Relationships:
+- One-to-Many with ChatSession (user can have multiple chat sessions)
+
+2. CHAT SESSION TABLE
+---------------------
+Purpose: Manages individual conversation sessions
+Primary Key: id (UUID)
+Foreign Key: userId (references User.id)
+
+Fields:
+- id: String @id @default(uuid())
+  * Primary key for session identification
+  * Used in URL routing (/chat/[sessionId])
+  
+- userId: String
+  * Foreign key linking to User table
+  * Ensures data isolation between users
+  
+- title: String
+  * User-friendly session name
+  * Default: "New Chat", can be updated by user
+  
+- lastMessage: String?
+  * Optional field storing the most recent message content
+  * Used for session previews in sidebar
+  * Improves performance by avoiding full message queries
+  
+- createdAt: DateTime @default(now())
+  * Session creation timestamp
+  
+- updatedAt: DateTime @updatedAt
+  * Last modification timestamp
+  * Updated when new messages are added
+
+Indexes:
+- @@index([userId]): Optimizes queries filtering by user
+- @@index([createdAt]): Optimizes chronological ordering
+
+Relationships:
+- Many-to-One with User (multiple sessions per user)
+- One-to-Many with Message (multiple messages per session)
+
+3. MESSAGE TABLE
+----------------
+Purpose: Stores individual chat messages
+Primary Key: id (UUID)
+Foreign Key: chatSessionId (references ChatSession.id)
+
+Fields:
+- id: String @id @default(uuid())
+  * Primary key for message identification
+  
+- chatSessionId: String
+  * Foreign key linking to ChatSession
+  * Ensures messages belong to specific sessions
+  
+- role: MessageRole (enum)
+  * Enum values: USER, ASSISTANT
+  * Distinguishes between user input and AI responses
+  * Critical for conversation flow and UI rendering
+  
+- content: String
+  * The actual message text
+  * Supports markdown and rich text formatting
+  
+- createdAt: DateTime @default(now())
+  * Message timestamp for chronological ordering
+  
+- updatedAt: DateTime @updatedAt
+  * Last modification timestamp
+
+Indexes:
+- @@index([chatSessionId]): Optimizes message retrieval by session
+- @@index([createdAt]): Optimizes chronological message ordering
+
+Relationships:
+- Many-to-One with ChatSession (multiple messages per session)
+
+4. MESSAGE ROLE ENUM
+--------------------
+Purpose: Type-safe message classification
+Values:
+- USER: Messages sent by authenticated users
+- ASSISTANT: Messages generated by AI systems
+
+================================================================================
+3. ARCHITECTURAL PATTERNS & DESIGN DECISIONS
+================================================================================
+
+DATABASE DESIGN PATTERNS
+------------------------
+1. Normalization: Proper 3NF design prevents data redundancy
+2. Referential Integrity: Foreign key constraints ensure data consistency
+3. Cascade Deletion: Automatic cleanup when parent records are deleted
+4. UUID Primary Keys: Security and scalability benefits
+5. Audit Fields: Automatic timestamp tracking for all entities
+
+PERFORMANCE OPTIMIZATIONS
+-------------------------
+1. Strategic Indexing:
+   - User-based queries: @@index([userId])
+   - Chronological ordering: @@index([createdAt])
+   - Session-based queries: @@index([chatSessionId])
+
+2. Denormalization for Performance:
+   - lastMessage field in ChatSession avoids expensive JOINs
+   - Improves sidebar loading performance
+
+3. Connection Pooling:
+   - Prisma manages database connections efficiently
+   - Reduces connection overhead
+
+SECURITY CONSIDERATIONS
+-----------------------
+1. Data Isolation: User-scoped queries prevent cross-user data access
+2. UUID Primary Keys: Prevent enumeration attacks
+3. Input Validation: Zod schemas in tRPC procedures
+4. Authentication: Clerk middleware protects sensitive routes
+5. SQL Injection Prevention: Prisma ORM provides parameterized queries
+
+SCALABILITY DESIGN
+------------------
+1. Horizontal Scaling: Stateless application design
+2. Database Scaling: Proper indexing supports large datasets
+3. Caching Strategy: React Query provides client-side caching
+4. Pagination: Built-in support for large result sets
+5. Connection Management: Prisma connection pooling
+
+================================================================================
+4. API ARCHITECTURE (tRPC)
+================================================================================
+
+PROCEDURE TYPES
+---------------
+1. Protected Procedures (Authentication Required):
+   - getSessions: Retrieve user's chat sessions
+   - getSession: Get specific session with messages
+   - createSession: Create new chat session
+   - deleteSession: Remove session and cascade delete messages
+
+2. Public Procedures (No Authentication):
+   - addMessage: Add message to existing session
+   - updateSessionTitle: Modify session title
+
+TYPE SAFETY
+-----------
+- End-to-end TypeScript types from database to frontend
+- Compile-time error detection
+- Automatic API documentation
+- IntelliSense support in IDE
+
+ERROR HANDLING
+--------------
+- Standardized error responses
+- Proper HTTP status codes
+- User-friendly error messages
+- Logging for debugging
+
+================================================================================
+5. DATA FLOW ARCHITECTURE
+================================================================================
+
+TYPICAL USER INTERACTION FLOW
+-----------------------------
+1. User Authentication (Clerk)
+   ↓
+2. Session Creation (tRPC → Prisma → PostgreSQL)
+   ↓
+3. Message Exchange (Frontend → tRPC → AI API → Database)
+   ↓
+4. Real-time Updates (React Query invalidation)
+   ↓
+5. Data Persistence (Prisma → PostgreSQL)
+
+MESSAGE PROCESSING PIPELINE
+---------------------------
+1. User Input → Frontend Validation
+2. tRPC Procedure → Input Validation (Zod)
+3. Database Insert → Message Storage
+4. AI API Call → Response Generation
+5. Database Insert → AI Response Storage
+6. Frontend Update → UI Refresh
+
+================================================================================
+6. DEPLOYMENT ARCHITECTURE
+================================================================================
+
+PRODUCTION STACK
+----------------
+- Frontend: Vercel (Next.js optimized)
+- Database: PostgreSQL (managed service)
+- Authentication: Clerk (SaaS)
+- AI Services: Cohere/Gemini (external APIs)
+- Monitoring: Built-in Vercel analytics
+
+ENVIRONMENT CONFIGURATION
+-------------------------
+- Development: Local PostgreSQL + Clerk dev keys
+- Staging: Vercel preview + staging database
+- Production: Vercel production + production database
+
+================================================================================
+7. FUTURE ARCHITECTURAL CONSIDERATIONS
+================================================================================
+
+SCALING STRATEGIES
+------------------
+1. Database: Read replicas for query distribution
+2. Caching: Redis for session and message caching
+3. CDN: Static asset optimization
+4. Microservices: Split AI processing into separate service
+5. Message Queue: Async processing for AI responses
+
+MONITORING & OBSERVABILITY
+--------------------------
+1. Application Metrics: Response times, error rates
+2. Database Metrics: Query performance, connection pools
+3. User Analytics: Session duration, message counts
+4. AI Metrics: Response quality, API usage
+
+================================================================================
+CONCLUSION
+================================================================================
+
+The Career Guide AI architecture follows modern best practices with:
+- Type-safe end-to-end development
+- Scalable database design
+- Secure authentication and data isolation
+- Performance-optimized queries
+- Maintainable code structure
+
+This foundation supports current functionality while providing a clear path
+for future enhancements and scaling requirements.
+
+================================================================================

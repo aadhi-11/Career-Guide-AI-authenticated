@@ -1,60 +1,133 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+/**
+ * Prisma Database Schema
+ * 
+ * This schema defines the database structure for the Career Guide AI application.
+ * It uses PostgreSQL as the database provider and defines three main entities:
+ * User, ChatSession, and Message with proper relationships and indexing.
+ * 
+ * Database Design:
+ * - Normalized structure with proper foreign key relationships
+ * - UUID primary keys for security and scalability
+ * - Cascade deletion for data consistency
+ * - Strategic indexing for query performance
+ * - Audit fields for tracking creation and updates
+ */
 
+// Prisma client generator configuration
 generator client {
   provider = "prisma-client-js"
 }
 
+// Database connection configuration
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider  = "postgresql"    // PostgreSQL database provider
+  url       = env("DATABASE_URL")      // Connection string from environment
+  directUrl = env("DIRECT_URL")        // Direct connection for migrations
 }
 
-// Users table for authentication (currently using fake data)
+/**
+ * User Model
+ * 
+ * Represents authenticated users in the system.
+ * Linked to Clerk authentication via user ID.
+ * 
+ * Fields:
+ * - id: UUID primary key (matches Clerk user ID)
+ * - name: User's display name
+ * - email: Unique email address
+ * - createdAt/updatedAt: Audit timestamps
+ * 
+ * Relationships:
+ * - One-to-Many with ChatSession (user can have multiple sessions)
+ */
 model User {
-  id           String        @id @default(uuid())
-  name         String
-  email        String        @unique
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  chatSessions ChatSession[]
+  id           String        @id @default(uuid())  // UUID primary key
+  name         String                                // User's display name
+  email        String        @unique                // Unique email address
+  createdAt    DateTime      @default(now())        // Creation timestamp
+  updatedAt    DateTime      @updatedAt             // Last update timestamp
+  chatSessions ChatSession[]                        // Related chat sessions
 
-  @@map("users")
+  @@map("users")  // Maps to 'users' table in database
 }
 
-// ChatSessions table linked to users
+/**
+ * ChatSession Model
+ * 
+ * Represents individual chat conversations between users and AI.
+ * Each session belongs to a specific user and contains multiple messages.
+ * 
+ * Fields:
+ * - id: UUID primary key
+ * - userId: Foreign key to User table
+ * - title: User-friendly session name
+ * - lastMessage: Cached last message for performance
+ * - createdAt/updatedAt: Audit timestamps
+ * 
+ * Relationships:
+ * - Many-to-One with User (multiple sessions per user)
+ * - One-to-Many with Message (multiple messages per session)
+ * 
+ * Indexes:
+ * - userId: Optimizes user-specific queries
+ * - createdAt: Optimizes chronological ordering
+ */
 model ChatSession {
-  id          String    @id @default(uuid())
-  userId      String
-  title       String
-  lastMessage String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages    Message[]
+  id          String    @id @default(uuid())        // UUID primary key
+  userId      String                                 // Foreign key to User
+  title       String                                 // Session title/name
+  lastMessage String?                                // Cached last message content
+  createdAt   DateTime  @default(now())             // Creation timestamp
+  updatedAt   DateTime  @updatedAt                  // Last update timestamp
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)  // User relationship
+  messages    Message[]                              // Related messages
 
-  @@map("chat_sessions")
-  @@index([userId])
-  @@index([createdAt])
+  @@map("chat_sessions")  // Maps to 'chat_sessions' table
+  @@index([userId])       // Index for user-based queries
+  @@index([createdAt])    // Index for chronological ordering
 }
 
-// Messages table linked to chat sessions
+/**
+ * Message Model
+ * 
+ * Represents individual messages within chat sessions.
+ * Messages can be from users or AI assistants.
+ * 
+ * Fields:
+ * - id: UUID primary key
+ * - chatSessionId: Foreign key to ChatSession
+ * - role: Message sender (USER or ASSISTANT)
+ * - content: Message text content
+ * - createdAt/updatedAt: Audit timestamps
+ * 
+ * Relationships:
+ * - Many-to-One with ChatSession (multiple messages per session)
+ * 
+ * Indexes:
+ * - chatSessionId: Optimizes session-based queries
+ * - createdAt: Optimizes chronological ordering
+ */
 model Message {
-  id            String      @id @default(uuid())
-  chatSessionId String
-  role          MessageRole
-  content       String
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  id            String      @id @default(uuid())    // UUID primary key
+  chatSessionId String                               // Foreign key to ChatSession
+  role          MessageRole                          // Message sender role
+  content       String                               // Message text content
+  createdAt     DateTime    @default(now())         // Creation timestamp
+  updatedAt     DateTime    @updatedAt              // Last update timestamp
+  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)  // Session relationship
 
-  @@map("messages")
-  @@index([chatSessionId])
-  @@index([createdAt])
+  @@map("messages")         // Maps to 'messages' table
+  @@index([chatSessionId])  // Index for session-based queries
+  @@index([createdAt])      // Index for chronological ordering
 }
 
+/**
+ * MessageRole Enum
+ * 
+ * Defines the possible roles for messages in the system.
+ * Used to distinguish between user input and AI responses.
+ */
 enum MessageRole {
-  USER
-  ASSISTANT
+  USER        // Messages sent by authenticated users
+  ASSISTANT   // Messages generated by AI systems
 }

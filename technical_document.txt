@@ -1,0 +1,77 @@
+================================================================================
+                    CAREER GUIDE AI - TECHNOLOGY STACK
+================================================================================
+
+FRONTEND TECHNOLOGIES
+---------------------
+Next.js 14
+Documentation: https://nextjs.org/docs
+GitHub: https://github.com/vercel/next.js
+
+TypeScript
+Documentation: https://www.typescriptlang.org/docs/
+GitHub: https://github.com/microsoft/TypeScript
+
+Tailwind CSS
+Documentation: https://tailwindcss.com/docs
+GitHub: https://github.com/tailwindlabs/tailwindcss
+
+React Query (TanStack Query)
+Documentation: https://tanstack.com/query/latest
+GitHub: https://github.com/TanStack/query
+
+Lucide React
+Documentation: https://lucide.dev/guide/packages/lucide-react
+GitHub: https://github.com/lucide-icons/lucide
+
+BACKEND TECHNOLOGIES
+--------------------
+tRPC
+Documentation: https://trpc.io/docs
+GitHub: https://github.com/trpc/trpc
+
+Prisma
+Documentation: https://www.prisma.io/docs
+GitHub: https://github.com/prisma/prisma
+
+Clerk
+Documentation: https://clerk.com/docs
+GitHub: https://github.com/clerkinc/javascript
+
+DATABASE
+--------
+PostgreSQL (NeonDB)
+Documentation: https://neon.tech/docs
+Website: https://neon.tech/
+
+AI INTEGRATION
+--------------
+Cohere API
+Documentation: https://docs.cohere.com/
+Website: https://cohere.com/
+
+Gemini AI (Google)
+Documentation: https://ai.google.dev/docs
+Website: https://ai.google.dev/
+
+DEVELOPMENT TOOLS
+-----------------
+ESLint
+Documentation: https://eslint.org/docs/
+GitHub: https://github.com/eslint/eslint
+
+Prettier
+Documentation: https://prettier.io/docs/en/
+GitHub: https://github.com/prettier/prettier
+
+pnpm
+Documentation: https://pnpm.io/motivation
+GitHub: https://github.com/pnpm/pnpm
+
+DEPLOYMENT & HOSTING
+--------------------
+Vercel
+Documentation: https://vercel.com/docs
+Website: https://vercel.com/
+
+================================================================================
